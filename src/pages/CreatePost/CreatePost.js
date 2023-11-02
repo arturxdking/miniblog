@@ -12,30 +12,44 @@ const CreatePost = () => {
   const [tags, setTags] = useState([])
   const [formError, setFormError] = useState("")
 
-  const {user} = useAuthValue()
+  const { user } = useAuthValue()
 
-  const {insertDocument, response} = useInsertDocument()
+  const { insertDocument, response } = useInsertDocument("posts")
+
+  const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
     setFormError("")
-    
+
     // validate image URL
-    
+    try {
+      new URL(image)
+    } catch (error) {
+      setFormError("A imagem precisa ser uma URL.")
+    }
+
     // criar o array de tags
+    const tagsArray = tags.split(",").map((tag) => tag.trim().toLowerCase())
 
     // checar todos os valores
+    if(!title || !image || !tags || !body) {
+      setFormError("Por favor, preencha todos os campos!")
+    }
+
+    if(formError) return
 
     insertDocument({
       title,
       image,
       body,
-      tags,
+      tagsArray,
       uid: user.uid,
       createdBy: user.displayName
     })
 
     // redirect to home page
+    navigate("/")
   }
 
   return (
@@ -45,10 +59,10 @@ const CreatePost = () => {
       <form onSubmit={handleSubmit}>
         <label>
           <span>Título:</span>
-          <input 
-            type="text" 
-            name="title" 
-            required 
+          <input
+            type="text"
+            name="title"
+            required
             placeholder="Pense em um bom título..."
             onChange={(e) => setTitle(e.target.value)}
             value={title}
@@ -56,10 +70,10 @@ const CreatePost = () => {
         </label>
         <label>
           <span>URL da imagem:</span>
-          <input 
-            type="text" 
-            name="image" 
-            required 
+          <input
+            type="text"
+            name="image"
+            required
             placeholder="Insira uma imagem que represente o seu post"
             onChange={(e) => setImage(e.target.value)}
             value={image}
@@ -67,9 +81,9 @@ const CreatePost = () => {
         </label>
         <label>
           <span>Conteúdo:</span>
-          <textarea 
-            name="body" 
-            required 
+          <textarea
+            name="body"
+            required
             placeholder="Insira o conteúdo do seu post"
             onChange={(e) => setBody(e.target.value)}
             value={body}
@@ -77,23 +91,23 @@ const CreatePost = () => {
         </label>
         <label>
           <span>Tags:</span>
-          <input 
-            type="text" 
-            name="image" 
-            required 
+          <input
+            type="text"
+            name="image"
+            required
             placeholder="Insira as tags separadas por vírgula"
             onChange={(e) => setTags(e.target.value)}
             value={tags}
           />
         </label>
-        <button className="btn">Cadastrar</button>
-        {!response.loading && <button className="btn">Entrar</button>}
+        {!response.loading && <button className="btn">Cadastrar</button>}
         {response.loading && (
           <button className="btn" disabled>
             Aguarde...
           </button>
         )}
         {response.error && <p className="error">{response.error}</p>}
+        {formError && <p className="error">{formError}</p>}
       </form>
     </div>
   );

@@ -9,7 +9,7 @@ const initialState = {
 
 const insertReducer = (state, action) => {
 
-    switch (action) {
+    switch (action.type) {
 
         case "LOADING":
             return { loading: true, error: null }
